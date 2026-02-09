@@ -1,5 +1,9 @@
 # context-cli
 
+[![Crates.io](https://img.shields.io/crates/v/context-cli.svg)](https://crates.io/crates/context-cli)
+[![Docs.rs](https://docs.rs/context-cli/badge.svg)](https://docs.rs/context-cli)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
 Command-line interface for the Context platform.
 
 `context-cli` is the simplest way to build, inspect, and query Context caches locally or in CI. It is deterministic, scriptable, and designed for automation.
