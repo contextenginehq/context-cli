@@ -67,10 +67,18 @@ Total                   12 passed
 
 - [ ] **Full cache verification for `inspect`** — Depends on context-core `verify_cache()` function (context-core P1). Until that exists, `valid` field in inspect output is approximate (checks file existence only, not hash verification or orphan detection).
 
+### P1 — Enterprise Ingestion CLI (see `context-specs/plans/enterprise_ingest_plan.md` Phase 1)
+
+- [ ] **Refactor `build` to use connector pipeline** — Replace direct walkdir logic with `FilesystemSource` + `ingest_from_source()`. All 12 existing tests must pass unchanged. Determinism: old path vs new path must produce identical caches.
+- [ ] **`--source-type` flag** — Add to `build` command (default: `filesystem`). Dispatch to appropriate `DocumentSource` implementation.
+- [ ] **`--connector-config <path>` flag** — JSON config file for connector-specific settings (auth tokens, endpoints, pagination). Validate at startup before ingestion begins.
+- [ ] **Exit code mapping for `ConnectorError`** — Map connector errors to appropriate frozen exit codes (6 for IO/auth, 7 for internal).
+
 ### P2 — Test gaps
 
 - [ ] **Build edge cases** — empty source dir, source dir with no `.md` files, source with non-UTF-8 files
 - [ ] **Pretty vs JSON format test** — verify both produce parseable JSON, differ only in whitespace
+- [ ] **Connector pipeline regression tests** — Verify `FilesystemSource` path produces byte-identical caches to pre-refactor `build`
 
 ### P3 — Post-v0
 
