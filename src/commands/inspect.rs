@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use clap::Args;
-use serde::Serialize;
+use serde_json::json;
 
 use context_core::cache::CacheManifest;
 
@@ -13,14 +13,6 @@ pub struct InspectArgs {
     /// Path to a built cache directory
     #[arg(long)]
     pub cache: PathBuf,
-}
-
-#[derive(Serialize)]
-struct InspectOutput {
-    cache_version: String,
-    document_count: usize,
-    total_bytes: u64,
-    valid: bool,
 }
 
 pub fn run(args: InspectArgs) -> Result<(), CliError> {
@@ -44,12 +36,12 @@ pub fn run(args: InspectArgs) -> Result<(), CliError> {
         }
     }
 
-    let output = InspectOutput {
-        cache_version: manifest.cache_version,
-        document_count: manifest.document_count,
-        total_bytes,
-        valid: all_files_exist,
-    };
+    let output = json!({
+        "cache_version": manifest.cache_version,
+        "document_count": manifest.document_count,
+        "total_bytes": total_bytes,
+        "valid": all_files_exist,
+    });
 
     let stdout = std::io::stdout();
     let mut out = stdout.lock();

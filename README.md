@@ -4,17 +4,30 @@
 [![Docs.rs](https://docs.rs/context-cli/badge.svg)](https://docs.rs/context-cli)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-Command-line interface for the Context platform.
+> `context-cli` is the command-line interface for the Context platform. It provides a deterministic, scriptable tool for building, inspecting, and auditing context caches across local development and CI/CD pipelines.
 
-`context-cli` is the simplest way to build, inspect, and query Context caches locally or in CI. It is deterministic, scriptable, and designed for automation.
+## Purpose
+
+The CLI is the build-time control plane for deterministic context infrastructure. Determinism guarantees that identical inputs produce byte-identical outputs across machines, operating systems, and supported Rust versions.
+
+- **CI/CD Native**: Seamlessly build context caches as build artifacts in your deployment pipeline.
+- **Auditable**: Inspect cache manifests and content hashes to ensure context integrity.
+- **Reproducible**: Every `resolve` operation is byte-identical to the results seen by your deployed AI agents.
+- **On-Prem Ready**: Works entirely offline with zero network dependencies.
+
+## Intended users
+
+- **Platform Engineers** managing AI infrastructure
+- **CI/CD Pipelines** producing deterministic context artifacts
+- **Security & Compliance Teams** auditing agent inputs
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `build` | Build a context cache from `.md` source documents |
-| `resolve` | Resolve context for a query against a built cache |
-| `inspect` | Inspect cache metadata and validity |
+| Command | Responsibility |
+|---------|----------------|
+| `build` | Compile `.md` source documents into a deterministic, content-addressed cache. |
+| `resolve` | Execute the selection engine locally to verify agent retrieval behavior. |
+| `inspect` | Validate cache integrity and view metadata snapshots. |
 
 ## Usage
 
@@ -24,43 +37,57 @@ Command-line interface for the Context platform.
 context build --sources ./docs --cache ./my-cache
 ```
 
-Reads all `.md` files recursively from `--sources` and produces a deterministic cache directory at `--cache`. Use `--force` to overwrite an existing cache.
+Recursively ingests markdown documents and produces an immutable cache directory. The cache contains all data required for deterministic selection, eliminating runtime indexing or external dependencies.
 
-### Resolve context
+### Resolve context (Local Audit)
 
 ```bash
-context resolve --cache ./my-cache --query "deployment" --budget 4000
+context resolve --cache ./my-cache --query "deployment architecture" --budget 4000
 ```
 
-Outputs a JSON selection result to stdout. The output is byte-identical across runs for the same cache, query, and budget.
+Verify exactly what context an agent will receive for a specific query and token budget. Results are output as JSON.
 
-### Inspect a cache
+### Inspect metadata
 
 ```bash
 context inspect --cache ./my-cache
 ```
 
-Outputs cache metadata as JSON:
+Example JSON output:
 
 ```json
 {
-  "cache_version": "sha256:...",
-  "document_count": 3,
-  "total_bytes": 955,
+  "cache_version": "v0",
+  "document_count": 42,
+  "total_bytes": 102400,
   "valid": true
 }
 ```
 
-## Output
+### CI/CD Integration
 
-- `resolve` and `inspect` write JSON to stdout
-- Diagnostic messages go to stderr
-- All output is deterministic
+Use the CLI to build context caches as part of your deployment artifacts:
+
+```bash
+# Example CI build step
+context build --sources ./docs --cache ./dist/context-cache
+context inspect --cache ./dist/context-cache
+```
+
+## Platform Role
+
+`context-cli` manages the lifecycle of deterministic context artifacts.
+
+- Build and verify caches during development and CI/CD
+- Audit context behavior locally before deployment
+- Produce the immutable artifacts consumed by `mcp-context-server`
+
+Agents never build context at runtime — they consume caches produced by this CLI.
 
 ## Exit codes
 
-| Code | Meaning | MCP Error Code |
-|------|---------|----------------|
+| Code | Meaning | MCP Error Equivalent |
+|------|---------|----------------------|
 | 0 | Success | — |
 | 1 | Usage error (bad arguments) | — |
 | 2 | Invalid query | `invalid_query` |
